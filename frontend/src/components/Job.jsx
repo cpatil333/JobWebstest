@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 const Job = ({ job }) => {
   const navigate = useNavigate();
   const jobId = "ffafdaf";
+
   const dayAgoApplied = (mongodbTime) => {
     try {
       const createdAt = new Date(mongodbTime);
@@ -19,6 +20,7 @@ const Job = ({ job }) => {
       console.log("something went wrong ", error);
     }
   };
+  
   return (
     <div className="p-5 rounded-md shadow-xl border border-gray-100">
       <div className="flex items-center justify-between">

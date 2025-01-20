@@ -2,12 +2,20 @@ import React from "react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Avatar, AvatarImage } from "./ui/avatar";
+import { useNavigate } from "react-router-dom";
 
 const LatestJobCards = ({ job }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="p-5 rounded-md shadow-xl bg-white border-gray-500 cursor-pointer">
       <div className="flex items-cente gap-2 my-2">
-        <Button className="p-6" variant="outline" size="icon">
+        <Button
+          onClick={() => navigate(`/description/${job?._id}`)}
+          className="p-6"
+          variant="outline"
+          size="icon"
+        >
           <Avatar>
             <AvatarImage src={job?.company?.logo} />
           </Avatar>

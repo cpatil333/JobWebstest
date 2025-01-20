@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../shared/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -6,7 +6,7 @@ import { Button } from "../ui/button";
 import { RadioGroup } from "../ui/radio-group";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { USER_API_END_POINT } from "@/utils/constant";
+import { USER_API_END_POINT } from "../../utils/constant";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading, setUser } from "../../../redux/authSlice";
@@ -19,7 +19,7 @@ const Login = () => {
     password: "",
     role: "",
   });
-  const { loading } = useSelector((state) => state.auth);
+  const { loading, user } = useSelector((store) => store.auth);
 
   const navigate = useNavigate();
   const changeEventHandler = (e) => {
@@ -30,27 +30,17 @@ const Login = () => {
     e.preventDefault();
     try {
       dispatch(setLoading(true));
-
-      const formsData = new FormData();
-      formsData.append("email", input.email);
-      formsData.append("password", input.password);
-      formsData.append("role", input.role);
-
-      const response = await axios.post(
-        `${USER_API_END_POINT}/login`,
-        formsData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
-      // console.log(response);
-      if (response.data.success) {
-        dispatch(setUser(response.data.users));
-        toast.success(response.data.message);
+      const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      });
+      // console.log(res.data);
+      if (res.data.success) {
+        dispatch(setUser(res.data.user));
         navigate("/");
+        toast.success(res.data.message);
       }
     } catch (error) {
       console.log(error);
@@ -60,22 +50,28 @@ const Login = () => {
     }
   };
 
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  });
+
   return (
     <div>
       <Navbar />
-      <div className="flex items-center justify-center mx-w-7xl mx-auto">
+      <div className="flex items-center justify-center max-w-7xl mx-auto">
         <form
           onSubmit={submitHandler}
           className="w-1/2 border border-gray-400 rounded-md p-4 my-10"
         >
-          <h1 className="font-bold text-xl mb-5">Login</h1>
+          <h1 className="font-bold text-xl mb-5">Log in</h1>
           <div>
             <Label>Email</Label>
             <Input
               type="email"
-              placeholder="Enter Email"
-              value={input.email}
+              placeholder="aanchalmittal@gmail.com"
               name="email"
+              value={input.email}
               onChange={changeEventHandler}
             />
           </div>
@@ -83,22 +79,22 @@ const Login = () => {
             <Label>Password</Label>
             <Input
               type="password"
-              placeholder="Enter Password"
-              value={input.password}
+              placeholder="enter password"
               name="password"
+              value={input.password}
               onChange={changeEventHandler}
             />
           </div>
-          <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center justify-between mt-5">
             <RadioGroup className="flex items-center gap-4 my-5">
               <div className="flex items-center space-x-2">
                 <Input
                   type="radio"
                   name="role"
                   value="student"
-                  className="cursor-pointer"
                   checked={input.role === "student"}
                   onChange={changeEventHandler}
+                  className="cursor-pointer"
                 />
                 <Label htmlFor="r1">Student</Label>
               </div>
@@ -107,17 +103,18 @@ const Login = () => {
                   type="radio"
                   name="role"
                   value="recruiter"
-                  className="cursor-pointer"
                   checked={input.role === "recruiter"}
                   onChange={changeEventHandler}
+                  className="cursor-pointer"
                 />
-                <Label htmlFor="r2">Recruiter</Label>
+                <Label htmlFor="rr">Recruiter</Label>
               </div>
             </RadioGroup>
           </div>
           {loading ? (
             <Button className="w-full my-4">
-              <Loader2 className="mr-2 h-2 w-2 animate-spin" /> Please wait..
+              {" "}
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
             </Button>
           ) : (
             <Button type="submit" className="w-full my-4">
@@ -125,11 +122,12 @@ const Login = () => {
             </Button>
           )}
 
-          <span className="text-sm font-bold">
-            Don't have an Account ?{" "}
-            <Link to="/signup" className="text-blue-500 font-bold text-sm">
-              SignUp
-            </Link>{" "}
+          <span className="text-sm">
+            {" "}
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-blue-600 text-sm">
+              Signup
+            </Link>
           </span>
         </form>
       </div>

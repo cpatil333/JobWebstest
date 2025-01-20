@@ -4,25 +4,25 @@ const userSchema = new mongoose.Schema(
   {
     fullName: {
       type: String,
-      require: true,
+      required: true,
     },
     email: {
       type: String,
-      require: true,
+      required: true,
       unique: true,
     },
     phoneNumber: {
       type: Number,
-      require: true,
+      required: true,
     },
     password: {
       type: String,
-      require: true,
+      required: true,
     },
     role: {
       type: String,
       enum: ["student", "recruiter"],
-      require: true,
+      required: true,
     },
     profile: {
       bio: { type: String },
@@ -30,7 +30,10 @@ const userSchema = new mongoose.Schema(
       resume: { type: String },
       resumeOriginalName: { type: String },
       company: { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
-      profilePhoto: { type: String, default: "" },
+      profilePhoto: {
+        type: String,
+        default: "",
+      },
     },
   },
   { timestamps: true }

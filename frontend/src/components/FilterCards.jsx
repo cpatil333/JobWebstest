@@ -1,15 +1,23 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
+import { useDispatch } from "react-redux";
+import { setSearchedQuery } from "../../redux/jobSlice.js";
 
 const filterData = [
   {
     filterType: "Location",
-    array: ["Delhi NCR", "Noida", "Pune", "Mumbai"],
+    array: ["Delhi NCR", "Noida", "Pune", "Mumbai", "Hyderabad"],
   },
   {
     filterType: "Industry",
-    array: ["Fronted Developer", "Bakend Developer", "Fullstack Developer"],
+    array: [
+      "Fronted Developer",
+      "Bakend Developer",
+      "Fullstack Developer",
+      "Jave Developer",
+      "React Developer",
+    ],
   },
   {
     filterType: "Salary",
@@ -17,19 +25,31 @@ const filterData = [
   },
 ];
 const FilterCards = () => {
+  const [selectedValue, setSelectedValue] = useState("");
+  const dispatch = useDispatch();
+
+  const changeHandler = (value) => {
+    setSelectedValue(value);
+  };
+  useEffect(() => {
+    //console.log(selectedValue);
+    dispatch(setSearchedQuery(selectedValue));
+  }, [selectedValue]);
+
   return (
     <div className="w-full bg-white p-3 rounded-md">
       <h1 className="font-bold text-lg">Filter Jobs</h1>
       <hr className="mt-3" />
-      <RadioGroup>
+      <RadioGroup value={selectedValue} onValueChange={changeHandler}>
         {filterData.map((data, index) => (
           <div key={index}>
             <h1 className="text-bold text-lg">{data.filterType}</h1>
-            {data.array.map((item, index) => {
+            {data.array.map((item, idx) => {
+              const itemId = `${index} - ${idx}`;
               return (
                 <div key={index} className="flex items-center space-x-2 my-2">
-                  <RadioGroupItem key={index} value={item} />
-                  <Label>{item}</Label>
+                  <RadioGroupItem id={itemId} key={index} value={item} />
+                  <Label htmlFor={itemId}>{item}</Label>
                 </div>
               );
             })}

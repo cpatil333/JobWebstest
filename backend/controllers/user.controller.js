@@ -7,27 +7,25 @@ import cloudinary from "../utils/cloudnary.js";
 export const register = async (req, res) => {
   try {
     const { fullName, email, phoneNumber, password, role } = req.body;
-    if (!fullName || !email || !phoneNumber || !password || !role) {
+    // console.log(fullName, email, phoneNumber, password, role)
+
+    if (!fullName || !email || !phoneNumber || !role) {
       return res.status(400).json({
-        message: "Something is missing",
+        message: "something is missing",
         success: false,
       });
     }
-    const userData = await User.findOne({ email: email });
-
-    if (userData) {
+    const file = req.file;
+    const fileUri = getDataUri(file);
+    const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+    const user = await User.findOne({ email });
+    if (user) {
       return res.status(400).json({
-        message: "user already exist with this email",
-        success: false,
+        message: "User already exist with the email",
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    ///cloudinary call
-    const fileUri = getDataUri(file);
-    const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-
     await User.create({
       fullName,
       email,
@@ -35,16 +33,16 @@ export const register = async (req, res) => {
       password: hashedPassword,
       role,
       profile: {
+       
         profilePhoto: cloudResponse.secure_url,
       },
     });
-
     return res.status(201).json({
-      message: "User Account created successfully",
+      message: "Account creted successfully.",
       success: true,
     });
   } catch (error) {
-    console.log("Something went wrong ", error);
+    console.log(error);
   }
 };
 
@@ -83,7 +81,7 @@ export const login = async (req, res) => {
       expiresIn: "1d",
     });
 
-    const users = {
+    const user = {
       _id: userData._id,
       fullName: userData.fullName,
       email: userData.email,
@@ -102,7 +100,7 @@ export const login = async (req, res) => {
       })
       .json({
         message: `Welcome back ${userData.fullName}`,
-        users,
+        user,
         success: true,
       });
   } catch (error) {

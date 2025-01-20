@@ -14,84 +14,79 @@ import { toast } from "sonner";
 const JobDescription = () => {
   const { singleJob } = useSelector((store) => store.jobs);
   const { user } = useSelector((store) => store.auth);
-  const dispatch = useDispatch();
+  const isIntiallyApplied =
+    singleJob?.applications.some(
+      (application) => application.applicant === user?._id
+    ) || false;
+  const [isApplied, setIsApplied] = useState(isIntiallyApplied);
   const params = useParams();
   const jobId = params.id;
+  const dispatch = useDispatch();
 
-  const isInitiallyApplied =
-    (Array.isArray(singleJob?.application) &&
-      singleJob.application.some(
-        (application) => application.applicant === user?._id
-      )) ||
-    false;
-  const [isApplied, setIsApplied] = useState(isInitiallyApplied);
-
+  const applyJobHandler = async () => {
+    try {
+      const res = await axios.get(
+        `${APPLICATION_API_END_POINT}/apply/${jobId}`,
+        { withCredentials: true }
+      );
+      console.log(res.data);
+      if (res.data.success) {
+        setIsApplied(true);
+        const updateSinglejob = {
+          ...singleJob,
+          applications: [...singleJob.applications, { applicant: user?._id }],
+        };
+        dispatch(setSingleJob(updateSinglejob));
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message);
+    }
+  };
   useEffect(() => {
     const fetchSingleJob = async () => {
-      const response = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, {
-        withCredentials: true,
-      });
-      if (response.data.success) {
-        setIsApplied(
-          Array.isArray(response.data.job.application) &&
-            response.data.job.application.some(
+      try {
+        const res = await axios(`${JOB_API_END_POINT}/get/${jobId}`, {
+          withCredentials: true,
+        });
+        if (res.data.success) {
+          dispatch(setSingleJob(res.data.job));
+          setIsApplied(
+            res.data.job.applications.some(
               (application) => application.applicant === user?._id
             )
-        );
-        dispatch(setSingleJob(response.data.job));
-      }
-      try {
+          );
+        }
       } catch (error) {
         console.log(error);
       }
     };
     fetchSingleJob();
   }, [jobId, dispatch, user?._id]);
-
-  const applyJobHandler = async () => {
-    try {
-      const response = axios.get(
-        `${APPLICATION_API_END_POINT}/apply/${jobId}`,
-        { withCredentials: true }
-      );
-      console.log(response.data);
-      if (response.data.success) {
-        setIsApplied(true);
-        const udpateSingleJob = {
-          ...singleJob,
-          applications: [...singleJob.applications, { applicant: user?._id }],
-        };
-        dispatch(setSingleJob(udpateSingleJob));
-        toast.success(response.data.message);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   return (
-    <div className="max-w-6xl mx-auto my-10">
-      <div className="flex items-center justify-between">
+    <div className="max-w-5xl mx-auto my-10">
+      <div className="flex itmes-center justify-between">
         <div>
           <h1 className="font-bold text-xl">{singleJob?.title}</h1>
-          <div className="flex items-center gap-3 mt-4">
-            <Badge className={"text-blue-700 font-bold"} variant={"ghost"}>
-              {singleJob?.position} Positions
+          <div>
+            <Badge className={"text-blue-700 font-bold"} variant="ghost">
+              {singleJob?.position}Positions
             </Badge>
-            <Badge className={"text-red-700 font-bold"} variant={"ghost"}>
+            <Badge className={"text-red-600 font-bold"} variant="ghost">
               {singleJob?.jobType}
             </Badge>
-            <Badge className={"text-purple-600 font-bold"} variant={"ghost"}>
-              {singleJob?.salary} LPA
+            <Badge className={"text-indigo-600 font-bold"} variant="ghost">
+              {singleJob?.salary}LPA
             </Badge>
           </div>
         </div>
         <Button
           onClick={isApplied ? null : applyJobHandler}
-          disable={isApplied}
+          disabled={isApplied}
           className={`rounded-lg ${
             isApplied
-              ? "bg-gray-500 cursor-not-allowed"
+              ? "bg-gray-600 cursor-not-allowed"
               : "bg-indigo-600 hover:bg-indigo-700"
           }`}
         >
@@ -102,46 +97,46 @@ const JobDescription = () => {
         Job Description
       </h1>
       <div>
-        <h1 className="font-bold my1">
+        <h1 className="font-bold my-1">
           Role:
           <span className="pl-4 font-normal text-gray-800">
             {singleJob?.title}
           </span>
         </h1>
-        <h1 className="font-bold my1">
+        <h1 className="font-bold my-1">
           Location:
           <span className="pl-4 font-normal text-gray-800">
             {singleJob?.location}
           </span>
         </h1>
-        <h1 className="font-bold my1">
+        <h1 className="font-bold my-1">
           Description:
           <span className="pl-4 font-normal text-gray-800">
             {singleJob?.description}
           </span>
         </h1>
-        <h1 className="font-bold my1">
+        <h1 className="font-bold my-1">
           Experience:
           <span className="pl-4 font-normal text-gray-800">
-            {singleJob?.experienceLevel} yrs
+            2{singleJob?.experience}yrs
           </span>
         </h1>
-        <h1 className="font-bold my1">
+        <h1 className="font-bold my-1">
           Salary:
           <span className="pl-4 font-normal text-gray-800">
-            {singleJob?.salary} LPA
+            {singleJob?.salary}LPA
           </span>
         </h1>
-        <h1 className="font-bold my1">
-          Total Applicant:
+        <h1 className="font-bold my-1">
+          Total Applicants:
           <span className="pl-4 font-normal text-gray-800">
-            {singleJob.application?.length}
+            {singleJob?.applications?.length}
           </span>
         </h1>
-        <h1 className="font-bold my1">
+        <h1 className="font-bold my-1">
           Posted Date:
           <span className="pl-4 font-normal text-gray-800">
-            {new Date(singleJob.createdAt).toLocaleDateString("en-gb")}
+            {singleJob?.createdAt.split("T")[0]}
           </span>
         </h1>
       </div>
